@@ -5,6 +5,61 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <Style x:Key="RoundButton" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="DodgerBlue"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="Padding" Value="15, 0, 15, 0"/>
+                <Setter Property="Height" Value="40"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="10"
+                                    Background="{TemplateBinding Background}"
+                                    BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}">
+                                </ContentPresenter>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <EventTrigger RoutedEvent="Button.MouseEnter">
+                        <EventTrigger.Actions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation 
+                                        AutoReverse="False" 
+                                        Duration="0:0:0.4" 
+                                        From="DodgerBlue" To="DarkBlue"
+                                        AccelerationRatio="1" 
+                                        Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)"
+                                        FillBehavior="HoldEnd">
+                                    </ColorAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger.Actions>
+                    </EventTrigger>
+                    <EventTrigger RoutedEvent="Button.MouseLeave">
+                        <EventTrigger.Actions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation 
+                                        AutoReverse="False" 
+                                        Duration="0:0:0.6" 
+                                        From="DarkBlue" To="DodgerBlue"
+                                        AccelerationRatio="1" 
+                                        Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)"
+                                        FillBehavior="HoldEnd">
+                                    </ColorAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger.Actions>
+                    </EventTrigger>
+                </Style.Triggers>
+            </Style>
             <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
                 <Setter Property="Height" Value="40"/>
                 <Setter Property="Width" Value="40"/>

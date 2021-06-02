@@ -7,59 +7,37 @@
              mc:Ignorable="d" 
              x:Name="root"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="White"
-          x:Name="mainGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition></RowDefinition>
-        </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" TextBlock.TextAlignment="Center">
-            <Button
-                Grid.Row="0"
-                HorizontalAlignment="Center"
-                Margin="5"
-                VerticalAlignment="Top"
-                Content="Add new node"
-                FontSize="20"
-                x:Name="btnAddNewNode"
-                Click="btnAddNewNode_Click"
-                FontFamily="Arial">
-            </Button>
-            <TextBlock x:Name="status"
-                       FontSize="25">
-                STATUS
-            </TextBlock>
-        </StackPanel>
+    <Grid x:Name="mainGrid">
         <Canvas x:Name="mainDraw"
-                Margin="70"
-                Background="LightGray"
-                Grid.Row="1">
-            <ItemsControl ItemsSource="{Binding Lines,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                Background="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Grid}, Path=Background}">
+            <ItemsControl ItemsSource="{Binding Edges,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type local:Line}">
+                    <DataTemplate DataType="{x:Type local:Edge}">
                         <Canvas>
-                            <Line Stroke="Black" 
-                                  StrokeThickness="2"
-                                  Fill="Black"
+                            <Line Stroke="{Binding EdgeColor}"
+                                  StrokeThickness="3.5"
+                                  MouseLeftButtonDown="Line_MouseLeftButtonDown"
                                   X1="{Binding From.X}"
                                   X2="{Binding To.X}"
                                   Y1="{Binding From.Y}"
-                                  Y2="{Binding To.Y}" />
-                            <Line Stroke="Black" 
+                                  Tag="{Binding ID}"
+                                  Y2="{Binding To.Y}">
+                            </Line>
+                            <Line Stroke="{Binding EdgeColor}"
                                   StrokeThickness="2"
-                                  Fill="Red"
+                                  MouseLeftButtonDown="Line_MouseLeftButtonDown"
                                   X1="{Binding A.X}"
                                   X2="{Binding P.X}"
                                   Y1="{Binding A.Y}"
                                   Y2="{Binding P.Y}" />
-                            <Line Stroke="Black" 
+                            <Line Stroke="{Binding EdgeColor}"
                                   StrokeThickness="2"
-                                  Fill="Red"
+                                  MouseLeftButtonDown="Line_MouseLeftButtonDown"
                                   X1="{Binding B.X}"
                                   X2="{Binding P.X}"
                                   Y1="{Binding B.Y}"
@@ -67,9 +45,13 @@
                             <TextBlock Canvas.Top="{Binding Center.Y}"
                                        Canvas.Left="{Binding Center.X}"
                                        FontFamily="Arial"
-                                       FontSize="17"
-                                       Text="{Binding Text}"
-                                />
+                                       FontSize="20"
+                                       Margin="0, 4, 0, 0"
+                                       Text="{Binding Weight}">
+                                <TextBlock.RenderTransform>
+                                    <RotateTransform Angle="{Binding TextAngle}"/>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
                         </Canvas>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
