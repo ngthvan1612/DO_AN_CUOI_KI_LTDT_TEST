@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DO_AN_WPF"
         mc:Ignorable="d"
-        FontSize="16"
+        FontSize="15"
         FontFamily="Arial"
         SizeToContent="Height"
         ResizeMode="NoResize"

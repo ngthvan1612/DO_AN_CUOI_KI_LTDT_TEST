@@ -31,8 +31,9 @@ namespace DO_AN_WPF
             graphLayout.ClearAllHighlight();
         }
 
-        private List<int> Dijkstra(int source, int target)
+        private List<int> Dijkstra(int source, int target, out double totalWeight)
         {
+            totalWeight = 0.00;
             Random r = new Random(Guid.NewGuid().GetHashCode());
             List<int> vertices = graphLayout.GetListVertex();
             List<Edge> edges = graphLayout.GetListEdges();
@@ -128,6 +129,8 @@ namespace DO_AN_WPF
                 result.Add(st.Pop());
             }
 
+            totalWeight = distance[target];
+
             return result;
         }
 
@@ -140,7 +143,7 @@ namespace DO_AN_WPF
         {
             OpenFileDialog openDialog = new OpenFileDialog()
             {
-                Filter = "Graph file|*.graph",
+                Filter = "Graph file|*.txt",
                 Multiselect = false
             };
             if (openDialog.ShowDialog() == true)
@@ -159,15 +162,41 @@ namespace DO_AN_WPF
             if (frm.ShowDialog() == true)
             {
                 ClearAllHighlight();
-                var listEdge = Dijkstra(Convert.ToInt32(frm.Source), Convert.ToInt32(frm.Target));
-                if (listEdge is null)
+                var listEdgeId = Dijkstra(Convert.ToInt32(frm.Source), Convert.ToInt32(frm.Target), out double totalWeight);
+                wndShortestPathInformation info = new wndShortestPathInformation();
+                if (listEdgeId == null)
                 {
-                    MessageBox.Show("Không có đường đi từ " + frm.Source + " đến " + frm.Target);
+                    info.Result = "Không tìm thấy đường đi";
+                    info.ResultForeColor = Brushes.Red;
                 }
                 else
                 {
-                    graphLayout.Highlight(listEdge, Brushes.Red);
+                    graphLayout.Highlight(listEdgeId, Brushes.Red);
+                    info.Result = "Đã tìm thấy đường đi";
+                    info.ResultForeColor = Brushes.Green;
+                    info.TotalWeight = totalWeight;
+                    StringBuilder sb = new StringBuilder();
+                    var listEdge = graphLayout.GetListEdges();
+                    info.ListEdge.Clear();
+                    if (frm.Source == frm.Target && listEdgeId.Count == 0)
+                    {
+                        sb.Append(frm.Source);
+                        info.TotalWeight = 0;
+                    }
+                    for (int i = 0; i < listEdgeId.Count; ++i)
+                    {
+                        sb.Append(listEdge[listEdgeId[i]].Source);
+                        sb.Append("\u279D");
+                        if (i == listEdgeId.Count - 1)
+                        {
+                            sb.Append(listEdge[listEdgeId[i]].Target);
+                        }
+                        info.ListEdge.Add(listEdge[listEdgeId[i]]);
+                    }
+                    info.ListVertex = sb.ToString();
                 }
+                info.Owner = this;
+                info.ShowDialog();
             }
         }
 

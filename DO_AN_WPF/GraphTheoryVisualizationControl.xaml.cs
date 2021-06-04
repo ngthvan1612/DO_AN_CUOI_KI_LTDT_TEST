@@ -263,6 +263,7 @@ namespace DO_AN_WPF
     public class Edge : INotifyPropertyChanged
     {
         private static double ARROW_LENGTH = 17.0;
+        private static double ARROW_ANGLE = Math.PI * 35 / 180;
 
         public int Source { get; set; } = -1;
         public int Target { get; set; } = -1;
@@ -306,20 +307,17 @@ namespace DO_AN_WPF
         {
             Center = new Point((From.X + To.X) / 2, (From.Y + To.Y) / 2);
 
-            Point u = new Point(To.X - From.X, To.Y - From.Y);
-            double length_u = Math.Sqrt(u.Y * u.Y + u.X * u.X);
-            Point v = new Point(u.X / length_u, u.Y / length_u);
-            Point PO = new Point(v.X * 0, v.Y * 0);
-            P = new Point(Math.Round(Center.X - PO.X, 2), Math.Round(Center.Y - PO.Y, 2));
+            Vector u = new Vector(From, To);
+            Vector v = u / u.Length;
+            P = Center;
 
-            double ang = Math.PI * 35 / 180;
+            Matrix matrix = Matrix.RotateMatrix(ARROW_ANGLE);
+            Vector AP = matrix * v * ARROW_LENGTH;
+            A = new Point(P.X - AP.X, P.Y - AP.Y);
 
-            Point AP = new Point(v.X * Math.Cos(ang) - v.Y * Math.Sin(ang), v.X * Math.Sin(ang) + v.Y * Math.Cos(ang));
-            A = new Point(P.X - AP.X * ARROW_LENGTH, P.Y - AP.Y * ARROW_LENGTH);
-
-            ang = -ang;
-            Point BP = new Point(v.X * Math.Cos(ang) - v.Y * Math.Sin(ang), v.X * Math.Sin(ang) + v.Y * Math.Cos(ang));
-            B = new Point(P.X - BP.X * ARROW_LENGTH, P.Y - BP.Y * ARROW_LENGTH);
+            matrix = Matrix.RotateMatrix(-ARROW_ANGLE);
+            Vector BP = matrix * v * ARROW_LENGTH;
+            B = new Point(P.X - BP.X, P.Y - BP.Y);
 
             TextAngle = 180.0 * Math.Atan(u.Y / u.X) / Math.PI;
         }
@@ -438,5 +436,91 @@ namespace DO_AN_WPF
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+    }
+
+    /// <summary>
+    /// Matrix 2d
+    /// </summary>
+    public struct Matrix
+    {
+        private readonly double[,] data;
+
+        public Matrix(double m11, double m12, double m21, double m22)
+        {
+            data = new double[2,2];
+            data[0, 0] = m11;
+            data[0, 1] = m12;
+            data[1, 0] = m21;
+            data[1, 1] = m22;
+        }
+
+        public static Matrix RotateMatrix(double ang)
+        {
+            return new Matrix(Math.Cos(ang), -Math.Sin(ang), Math.Sin(ang), Math.Cos(ang));
+        }
+
+        public static Matrix operator *(Matrix A, Matrix B)
+        {
+            Matrix C = new Matrix(0, 0, 0, 0);
+            for (int k = 0; k < 2; ++k)
+            {
+                for (int i = 0; i < 2; ++i)
+                {
+                    for (int j = 0; j < 2; ++j)
+                    {
+                        C.data[i, j] = A.data[i, k] * B.data[k, j];
+                    }
+                }
+            }
+            return C;
+        }
+
+        public static Vector operator *(Matrix A, Vector u)
+        {
+            return new Vector(A.data[0, 0] * u.X + A.data[0, 1] * u.Y, A.data[1, 0] * u.X + A.data[1, 1] * u.Y);
+        }
+    }
+
+    public struct Vector
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+
+        public double Length
+        {
+            get { return Math.Sqrt(X * X + Y * Y); }
+        }
+
+        public Vector(Point P, Point Q)
+        {
+            X = Q.X - P.X;
+            Y = Q.Y - P.Y;
+        }
+
+        public Vector(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public static Vector operator +(Vector u, Vector v)
+        {
+            return new Vector(u.X + v.X, u.Y + v.Y);
+        }
+
+        public static Vector operator -(Vector u, Vector v)
+        {
+            return new Vector(u.X - v.X, u.Y - v.Y);
+        }
+
+        public static Vector operator *(Vector u, double z)
+        {
+            return new Vector(u.X * z, u.Y * z);
+        }
+
+        public static Vector operator /(Vector u, double z)
+        {
+            return new Vector(u.X / z, u.Y / z);
+        }
     }
 }
