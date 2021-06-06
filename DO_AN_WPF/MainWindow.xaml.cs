@@ -33,13 +33,43 @@ namespace DO_AN_WPF
 
         private List<int> Dijkstra(int source, int target, out double totalWeight)
         {
-            totalWeight = 0.00;
-            Random r = new Random(Guid.NewGuid().GetHashCode());
+            //Lấy danh sách đỉnh ra
             List<int> vertices = graphLayout.GetListVertex();
+
+            //Lấy danh sách cạnh ra
             List<Edge> edges = graphLayout.GetListEdges();
 
+            //n là số đỉnh của đồ thị
             int n = vertices.Count;
 
+            //inHeap[u] = true khi đỉnh u đã được tối ưu, ban đầu tất cả inHeap[u] = false
+            bool[] inHeap = new bool[n];
+            for (int i = 0; i < n; ++i)
+            {
+                inHeap[i] = false;
+            }
+
+            //distance[u] là độ dài đường đi ngắn nhất từ đỉnh source đến u
+            //và distance[source] khởi tạo bằng vô cực
+            double[] distance = new double[n];
+            for (int i = 0; i < n; ++i)
+            {
+                distance[i] = double.PositiveInfinity;
+            }
+            distance[source] = 0;
+
+            //parent[u] là đỉnh cha của u trên đồ thị đường đi ngắn nhất
+            //ban đầu tất cả đều là -1 (không xác định)
+            int[] parent = new int[n];
+            for (int i = 0; i < n; ++i)
+            {
+                parent[i] = -1;
+            }
+
+            //kết quả độ dài đường đi ngắn nhất từ source đến target lưu ở biến này
+            totalWeight = 0.00;
+
+            //Tạo danh sách kề từ danh sách cạnh
             List<Edge>[] adj = new List<Edge>[n];
             for (int i = 0; i < n; ++i)
             {
@@ -51,28 +81,13 @@ namespace DO_AN_WPF
                 adj[edges[i].Source].Add(new Edge(edges[i].ID, edges[i].Source, edges[i].Target, edges[i].Weight));
             }
 
-            bool[] inHeap = new bool[n];
-            for (int i = 0; i < n; ++i)
-            {
-                inHeap[i] = false;
-            }
-
-            double[] distance = new double[n];
-            for (int i = 0; i < n; ++i)
-            {
-                distance[i] = double.PositiveInfinity;
-            }
-
-            int[] parent = new int[n];
-            for (int i = 0; i < n; ++i)
-            {
-                parent[i] = -1;
-            }
-
-            distance[source] = 0;
-
+            //Dijkstra
             while (true)
             {
+                //B1. Chọn đỉnh u mà u chưa tối ưu và có distance[u] nhỏ nhất
+                //Nếu có nhiều đỉnh u như vậy thì chọn ra u có chỉ số nhỏ nhất
+                //Vì ta thử i từ 0 đến n - 1, và chỉ cập nhật kết quả khi distance[u] > distance[i]
+                //Giả sử u = -1 tức là không tìm thấy
                 int u = -1;
                 for (int i = 0; i < n; ++i)
                 {
@@ -92,10 +107,13 @@ namespace DO_AN_WPF
                     }
                 }
 
+                //Nếu tìm thấy đỉnh u như vậy
                 if (u >= 0)
                 {
+                    //Đánh dấu u đã được tối ưu
                     inHeap[u] = true;
 
+                    //Cực tiểu hóa các distance[v] mà (u, v) thuộc E (tức là tồn tại cung (u, v))
                     foreach (Edge e in adj[u])
                     {
                         int v = e.Target;
@@ -112,11 +130,15 @@ namespace DO_AN_WPF
                 else break;
             }
 
+            //Nếu distance[target] vẫn là vô cực, tức là không có đường đi => trả về null
             if (double.IsPositiveInfinity(distance[target]))
                 return null;
-            List<int> result = new List<int>();
-            Stack<int> st = new Stack<int>();
 
+            //Truy vết đường đi
+            List<int> result = new List<int>(); //Lưu kết quả
+            Stack<int> st = new Stack<int>(); //Truy vết từ đỉnh target về đỉnh source
+
+            //Liên tục nhảy từ target lên parent[target], lên parent[parent[target]] cho đến khi nào không đi được nữa
             int temp = target;
             while (parent[temp] != -1)
             {
@@ -124,13 +146,16 @@ namespace DO_AN_WPF
                 temp = edges[parent[temp]].Source;
             }
 
+            //Đảo ngược lại đường đi => cho danh sách cạnh vào kết quả
             while (st.Count > 0)
             {
                 result.Add(st.Pop());
             }
 
+            //Gán lại độ dài đường đi ngắn nhất
             totalWeight = distance[target];
 
+            //Trả về kết quả
             return result;
         }
 
